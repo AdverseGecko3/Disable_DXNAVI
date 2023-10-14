@@ -1,4 +1,5 @@
 import winreg
+import sys
 
 REG_PATH = r"SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\0000"
 REG_NAMES = [r"D3DVendorName", r"D3DVendorNameWoW"]
@@ -25,8 +26,15 @@ for i, REG_NAME in enumerate(REG_NAMES):
             newValues[i].append(value)
     
     # Open the key on the loop index again, but with SET access, set the new Multi-String, and close it
-    registry_key_write = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, REG_PATH, 0, winreg.KEY_SET_VALUE)
-    winreg.SetValueEx(registry_key_write, REG_NAMES[i], 0, regType, newValues[i])
-    winreg.CloseKey(registry_key_write)
+    try:
+        registry_key_write = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, REG_PATH, 0, winreg.KEY_SET_VALUE)
+        winreg.SetValueEx(registry_key_write, REG_NAMES[i], 0, regType, newValues[i])
+        winreg.CloseKey(registry_key_write)
+    except PermissionError as e:
+        print(f'Error! App must be to run as Administrator in order to update registry keys.')
+        input('Press any key to continue...')
+        sys.exit(1)
 
     print(f'Key {i+1} of 2 updated!')
+
+input('Press any key to continue...')
